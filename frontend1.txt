@@ -1,0 +1,144 @@
+! pip install streamlit
+!pip install tensorflow
+!pip install altair
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+%%writefile app.py
+import streamlit as st
+import cv2
+import numpy as np
+import pandas as pd
+import altair as alt
+from PIL import Image
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image
+import io
+
+# Load the trained model
+skincancermodel = load_model("/content/drive/MyDrive/skinmodelbfive.hdf5")
+
+# Mapping for anatomical sites and gender
+anatomical_site_mapping = ['head/neck', 'upper extremity', 'anterior torso', 'lower extremity', 'posterior torso', 'lateral torso', 'palms/soles', 'oral/genital', 'unknown']
+gender_mapping = ['male', 'female', 'unknown']
+class_labels = ['Benign Keratosis', 'Melanoma', 'Basal Cell Carcinoma', 'Squamous Cell Carcinoma']
+
+# Severity information for each cancer type
+severity_info = {
+    'Benign Keratosis': 'Generally benign, but consult a dermatologist for evaluation.',
+    'Melanoma': 'Potentially dangerous. Consult a dermatologist immediately.',
+    'Basal Cell Carcinoma': 'Usually non-aggressive, but consult a dermatologist for proper evaluation.',
+    'Squamous Cell Carcinoma': 'Can be aggressive. Consult a dermatologist promptly.'
+}
+
+def preprocess_image(uploaded_file):
+    # If the input is a BytesIO object, directly open it as an Image
+    if isinstance(uploaded_file, io.BytesIO):
+        pil_image = Image.open(uploaded_file)
+    else:
+        # Otherwise, it's already a PIL Image
+        pil_image = uploaded_file
+
+    # Ensure the image is in RGB format
+    if pil_image.mode != 'RGB':
+        pil_image = pil_image.convert('RGB')
+
+    # Convert PIL Image to NumPy array
+    img = np.array(pil_image)
+
+    # Resize the image to (224, 224)
+    img = cv2.resize(img, (224, 224))
+
+    # Normalize
+    img = img / 255.0
+
+    # Add batch dimension
+    img = np.expand_dims(img, axis=0)
+
+    return img
+
+# Function to convert any image to JPG format
+def convert_to_jpg(uploaded_file):
+    pil_image = Image.open(uploaded_file)
+
+    # Check if the image is already in JPG format
+    if pil_image.format == "JPEG":
+        return pil_image
+
+    # Convert to JPG
+    jpeg_buffer = io.BytesIO()
+    pil_image.convert("RGB").save(jpeg_buffer, format="JPEG")
+    return Image.open(jpeg_buffer)
+
+# Streamlit app
+st.title("Skin Cancer Classification App")
+
+# Upload image through Streamlit
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg", "gif", "bmp", "webp", "tiff"])
+
+if uploaded_file is not None:
+    # Convert the uploaded image to JPG format
+    jpg_image = convert_to_jpg(uploaded_file)
+
+    st.image(jpg_image, caption="Uploaded and Converted to JPG", use_column_width=True)
+
+    # User inputs
+    age = st.number_input("Enter age:", min_value=-1)
+    gender = st.selectbox("Select gender:", gender_mapping)
+    anatomical_site = st.selectbox("Select anatomical site:", anatomical_site_mapping)
+
+    # Predict when the user clicks the button
+    if st.button("Predict"):
+        # Preprocess the image
+        img = preprocess_image(jpg_image)
+
+        # One-hot encode gender and anatomical site
+        gender_encoded = np.array([[1, 0, 0]]) if gender == 'male' else np.array([[0, 1, 0]]) if gender == 'female' else np.array([[0, 0, 1]])
+        anatomical_site_encoded = np.zeros((1, 9))
+        anatomical_site_encoded[0, anatomical_site_mapping.index(anatomical_site)] = 1
+
+        # Convert age to a 2D array
+        age_array = np.array([[age]])
+
+        # Make predictions
+        prediction = skincancermodel.predict([img, age_array, gender_encoded, anatomical_site_encoded])
+
+        # Get the predicted class
+        predicted_class_index = np.argmax(prediction)
+        predicted_class_name = class_labels[predicted_class_index]
+
+        # Get severity information and message
+        severity_info_text = severity_info.get(predicted_class_name, 'Severity information not available.')
+        message = f"The predicted class is {predicted_class_name}. {severity_info_text}"
+
+        # Display the result
+        st.write("Predicted Class:", predicted_class_name)
+        st.write("Prediction Message:", message)
+
+        # Plot the predicted probabilities as a histogram using Altair
+        df = pd.DataFrame({'Class': class_labels, 'Probability': prediction.flatten()})
+        chart = alt.Chart(df).mark_bar().encode(
+            x='Class',
+            y='Probability',
+            tooltip=['Class', 'Probability']
+        ).interactive()
+
+        st.altair_chart(chart)
+
+
+!pip install pyngrok
+!ngrok authtoken 2YQJN10bXQallQb7D85h8B405Df_5xrseiJHTP4uwYyimiGG1
+
+
+from pyngrok import ngrok
+!nohup streamlit run app.py &
+
+
+ngrok.kill()
+# Connect to the streamlit app on port 8501
+public_url = ngrok.connect(addr="8501", proto="http")
+
+print("Streamlit app is live at:", public_url)
+
+

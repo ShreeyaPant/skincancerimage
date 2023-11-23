@@ -1,0 +1,647 @@
+# Importing the EfficientNetB4 model from TensorFlow's applications module
+from tensorflow.keras.applications import EfficientNetB4
+import pandas as pd  # For working with data in tabular format
+import numpy as np # For numerical operations
+import cv2 # For computer vision tasks
+import os # For file and directory operations
+import sklearn
+import random  # For generating random numbers
+from PIL import Image  # For working with images
+import matplotlib.pyplot as plt  # For plotting graphs and images
+from pathlib import Path
+import seaborn as sns
+print('Success') # Printing a message to indicate success
+
+
+# Specify the folder path you want to list files and directories from
+folder_path = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input"
+# Define the paths to the directories on your local machine
+benignkeratosis_directory = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\Training\\BenignKeratosis"
+melanoma_directory = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\Training\\Melanoma"
+basalcell_directory = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\Training\\BasalCellCarcinoma"
+squammous_directory="C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\Training\\SquamousCellCarcinoma"
+# List the files and directories in each of the specified directories
+benignimages=os.listdir(benignkeratosis_directory)
+melanomaimages = os.listdir(melanoma_directory)
+basalimages = os.listdir(basalcell_directory)
+squammousimages = os.listdir(squammous_directory)
+benign_count = len(benignimages)
+melanoma_count = len(melanomaimages)
+basal_count = len(basalimages)
+squammous_count = len(squammousimages)
+total_count=benign_count+melanoma_count+basal_count+squammous_count
+print('The total no odf images:',total_count)
+
+
+# Path to the CSV files
+csv_file_path_ground = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\ISIC_2019_Training_GroundTruth.csv"
+csv_file_path_metadata = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\ISIC_2019_Training_Metadata.csv"
+
+# Read the CSV files
+ground_truth = pd.read_csv(csv_file_path_ground)
+metadata = pd.read_csv(csv_file_path_metadata)
+
+# Merge the DataFrames based on the "image" column
+combined_data = pd.merge(ground_truth, metadata, on="image")
+
+# Filter the data for the specific types (melanoma, benign, basal cell carcinoma)
+filtered_data = combined_data[(combined_data['MEL'] == 1) |(combined_data['SCC'] == 1) | (combined_data['BKL'] == 1) | (combined_data['BCC'] == 1)]
+
+# Select relevant columns (including "image", "age_approx", "anatom_site_general", "sex")
+selected_data = filtered_data[["image", "age_approx", "anatom_site_general", "sex", "MEL","SCC", "BKL", "BCC"]]
+
+# Display the combined data
+print(selected_data)
+
+# Iterate through the selected_data DataFrame and extract age, anatomical site, and sex
+age_metadata = selected_data["age_approx"].values
+anatom_site_metadata = selected_data["anatom_site_general"].values
+sex_metadata = selected_data["sex"].values
+
+# Convert the metadata lists to NumPy arrays
+#age_metadata = np.array(age_metadata)
+print(age_metadata)
+#anatom_site_metadata = np.array(anatom_site_metadata)
+#sex_metadata = np.array(sex_metadata)
+
+
+data = {
+    'Category': ['Benign Keratosis', 'Melanoma', 'Basal Cell Carcinoma','Squamous Cell Carcinoma'],
+    'Count': [benign_count, melanoma_count, basal_count,squammous_count]
+}
+df = pd.DataFrame(data)
+# Define your custom color palette with three distinct colors
+sns.set(style="whitegrid")
+plt.figure(figsize=(8, 5))
+
+# Create the countplot
+sns.barplot(x='Category', y='Count', data=df, palette='viridis')
+plt.title('Image Counts by Category')
+plt.xlabel('Category')
+plt.ylabel('Count')
+
+# Rotate x-axis labels for better readability
+plt.xticks(rotation=25)
+
+plt.show()
+
+
+
+
+import re  # Import the regular expressions module
+
+# Function to load images, assign labels, and metadata
+def load_images_labels_metadata(directory, label, selected_data):
+    data, labels, ages, sexes, anatomical_sites = [], [], [], [], []
+
+    for image_path in directory.glob('*.jpg'):
+        if image_path.is_file():
+            image_name = image_path.stem  # Get the image filename without the extension
+            try:
+                image = cv2.imread(str(image_path))
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = cv2.resize(image, (224, 224))
+                data.append(image)
+                labels.append(label)
+
+                # Extract the common subportion from the image name
+                match = re.search(r'ISIC_(\d+)', image_name)
+                if match:
+                    subportion = match.group(1)
+                    # Find the corresponding metadata in selected_data based on the subportion
+                    metadata_entry = selected_data[selected_data['image'].str.contains(subportion)]
+                    if not metadata_entry.empty:
+                        age = metadata_entry['age_approx'].values[0]
+                        sex = metadata_entry['sex'].values[0]
+                        anatomical_site = metadata_entry['anatom_site_general'].values[0]
+                        if pd.isna(anatomical_site):
+                            anatomical_site = 'unknown'
+                        if pd.isna(age):
+                            age = -1  # Replace missing age with -1 or any other suitable placeholder
+                        if pd.isna(sex):
+                            sex = 'unknown'  # Replace missing sex with 'unknown'
+                        ages.append(age)
+                        sexes.append(sex)
+                        anatomical_sites.append(anatomical_site)
+                        print(f"Loaded image: {image_path.name} with label {label}, age {age}, sex {sex}, site {anatomical_site}, size: {image.shape}")
+                    else:
+                        print(f"Error: No matching subportion found in image name: {image_path.name}")
+                        ages.append(-1)  # Replace missing age with -1 or any other suitable placeholder
+                        sexes.append('unknown')  # Replace missing sex with 'unknown'
+                        anatomical_sites.append('unknown')
+            except AttributeError:
+                print(f"Error loading image: {image_path.name}")
+
+    return data, labels, ages, sexes, anatomical_sites
+# Load images and assign labels, age, sex, and anatomical site using the extracted metadata
+benign_data, benign_labels, benign_ages, benign_sexes, benign_sites = load_images_labels_metadata(Path(benignkeratosis_directory), 0, selected_data)
+melanoma_data, melanoma_labels, melanoma_ages, melanoma_sexes, melanoma_sites = load_images_labels_metadata(Path(melanoma_directory), 1, selected_data)
+basal_data, basal_labels, basal_ages, basal_sexes, basal_sites = load_images_labels_metadata(Path(basalcell_directory), 2, selected_data)
+squammous_data, squammous_labels, squammous_ages, squammous_sexes, squammous_sites = load_images_labels_metadata(Path(squammous_directory), 3, selected_data)
+
+# Combine data and labels for all categories
+data = np.concatenate((benign_data, melanoma_data, basal_data,squammous_data), axis=0)
+labels = np.concatenate((benign_labels, melanoma_labels, basal_labels,squammous_labels), axis=0)
+ages = np.concatenate((benign_ages, melanoma_ages, basal_ages,squammous_ages), axis=0)
+sexes = np.concatenate((benign_sexes, melanoma_sexes, basal_sexes, squammous_sexes), axis=0)
+anatomical_sites = np.concatenate((benign_sites, melanoma_sites, basal_sites,squammous_sites), axis=0)
+
+# Verify the shape of the data and labels arrays
+print("Data shape:", data.shape)
+print("Labels shape:", labels.shape)
+print("Ages shape:", ages.shape)
+print("Sexes shape:", sexes.shape)
+print("Anatomical Sites shape:", anatomical_sites.shape)
+
+
+
+# Convert features, labels, ages, sexes, and anatomical_sites to NumPy arrays
+feats, labels, ages, sexes, anatomical_sites = np.array(data), np.array(labels), np.array(ages), np.array(sexes), np.array(anatomical_sites)
+
+# Define a path for saving all the data
+data_save_path = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\Training\\data_train.npz"
+
+# Save all the arrays together
+np.savez(data_save_path, feats=feats, labels=labels, ages=ages, sexes=sexes, anatomical_sites=anatomical_sites)
+
+# Confirm that the arrays have been saved
+print("Data saved to:", data_save_path)
+
+# Load the data (feats, labels, ages, sexes, and anatomical_sites)
+loaded_data = np.load(data_save_path)
+feats = loaded_data['feats']
+labels = loaded_data['labels']
+ages = loaded_data['ages']
+sexes = loaded_data['sexes']
+anatomical_sites = loaded_data['anatomical_sites']
+
+print("Features shape:", feats.shape)
+print(feats)
+print("Labels shape:", labels.shape)
+print(labels)
+print("Ages shape:", ages.shape)
+print(ages)
+print("Sexes shape:", sexes.shape)
+print(sexes)
+print("Anatomical Sites shape:", anatomical_sites.shape)
+print(anatomical_sites)
+
+
+
+from sklearn.utils import shuffle
+# Shuffle the training data and associated metadata arrays with a random state for reproducibility
+feats,labels, ages, sexes, anatomical_sites = shuffle(feats,labels, ages, sexes, anatomical_sites, random_state=42)
+
+
+#Train Test Split
+# splitting cells images into 80:20 ratio i.e., 80% for training and 20% for testing purpose
+# Split the data and labels into training (80%) and testing (20%) sets
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test, ages_train, ages_test, sexes_train, sexes_test, anatomical_sites_train, anatomical_sites_test = train_test_split(feats, labels, ages, sexes, anatomical_sites, test_size=0.2, random_state=42, shuffle=False)
+
+
+# Image Data Normalization
+x_train = x_train.astype('float32') / 255.0
+x_test = x_test.astype('float32') / 255.0
+
+
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from sklearn.utils.class_weight import compute_class_weight
+# Calculate class weights based on the training dataset
+num_classes = 4 # Adjust according to your dataset
+class_labels = np.unique(y_train)  # Extract unique class labels from y_train
+class_weights = compute_class_weight(class_weight='balanced', classes=class_labels, y=y_train)
+class_wt_dict = dict(enumerate(class_weights))
+
+
+# Define data augmentation for the training set
+trainAug = ImageDataGenerator(
+    rotation_range=11,
+    zoom_range=0.11,
+    width_shift_range=0.10,
+    height_shift_range=0.12,
+    horizontal_flip=True
+    )
+# Define data augmentation for the validation set
+valAug = ImageDataGenerator()
+
+# Set the batch size
+BS = 32
+
+from tensorflow.keras.utils import to_categorical
+# Assuming y_train is the non-one-hot encoded labels
+encoder = OneHotEncoder(sparse=False)
+y_train_one_hot = encoder.fit_transform(y_train.reshape(-1, 1))
+y_test_one_hot = encoder.fit_transform(y_test.reshape(-1, 1))
+
+
+# One-hot encode the 'sex' attribute
+sex_encoder = OneHotEncoder(sparse=False)
+sexes_train_encoded = sex_encoder.fit_transform(sexes_train.reshape(-1, 1))
+sexes_test_encoded = sex_encoder.transform(sexes_test.reshape(-1, 1))
+# One-hot encode the 'anatomical_sites' attribute
+anatomical_sites_encoder = OneHotEncoder(sparse=False)
+anatomical_sites_train_encoded = anatomical_sites_encoder.fit_transform(anatomical_sites_train.reshape(-1, 1))
+anatomical_sites_test_encoded = anatomical_sites_encoder.transform(anatomical_sites_test.reshape(-1, 1))
+
+
+# Load the pre-trained EfficientNetB3 model without the top (classification) layers
+base_model = EfficientNetB4(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+
+# Set the number of layers to fine-tune
+fine_tune_layers = 500
+
+# Freeze the first few layers and unfreeze the rest
+for layer in base_model.layers[:-fine_tune_layers]:
+    layer.trainable = False
+for layer in base_model.layers[-fine_tune_layers:]:
+    layer.trainable = True
+
+
+from tensorflow.keras import Model
+from tensorflow.keras.layers import Input, Flatten, GlobalMaxPooling2D, GlobalAveragePooling2D, Dense, Dropout, concatenate
+
+# Define the image input
+image_input = Input(shape=(224, 224, 3), name='image_input')
+image_branch = base_model(image_input)  # Use the base model as the image branch
+
+# Define the metadata inputs
+sex_input = Input(shape=(3,), name='sex_input')  # Assuming binary encoding
+anatomical_sites_input = Input(shape=(9,), name='anatomical_sites_input')  # N is the number of unique anatomical sites
+age_input = Input(shape=(1,), name='age_input')  # Age input
+
+# Flatten the inputs that need to be reshaped
+sex_input_flat = Flatten()(sex_input)
+anatomical_sites_input_flat = Flatten()(anatomical_sites_input)
+age_input_flat = Flatten()(age_input)
+
+# Extract features from the base model
+x = base_model(image_input)
+x_maxpool = GlobalMaxPooling2D()(x)
+x_avgpool = GlobalAveragePooling2D()(x)
+
+# Combine the output of pooling layers (if both used)
+if x_maxpool is not None and x_avgpool is not None:
+    x = concatenate([x_maxpool, x_avgpool])
+elif x_maxpool is not None:
+    x = x_maxpool
+elif x_avgpool is not None:
+    x = x_avgpool
+
+# Concatenate additional features
+x = concatenate([x, age_input_flat, sex_input_flat, anatomical_sites_input_flat])
+
+# Add fully connected layers and dropout
+x = Dense(150, activation='relu')(x)
+x = Dropout(0.12)(x)
+x = Dense(50, activation='relu')(x)
+x = Dropout(0.1)(x)
+# Output layer for classification (adjust the number of units for your task)
+predictions = Dense(4, activation='softmax', name='output')(x)
+
+# Create the final model
+model = Model(inputs=[image_input, age_input, sex_input, anatomical_sites_input], outputs=predictions)
+model.summary()
+
+
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+model_chkpt = ModelCheckpoint('C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\Training\\skinmodelbfive.hdf5',save_best_only=True, monitor='val_loss',mode='min',verbose=1)
+lr_reduce = ReduceLROnPlateau(monitor='val_loss', factor=0.31, patience=2,mode='min', min_lr=0.0000001,verbose=1)
+
+callback_list = [model_chkpt,lr_reduce]
+
+
+
+from tensorflow.keras.utils import Sequence
+
+class CustomDataGenerator(Sequence):
+    def __init__(self, x, y, ages, sexes, anatomical_sites, batch_size, image_data_generator, shuffle=True):
+        self.x = x
+        self.y = y
+        self.ages = ages
+        self.sexes = sexes
+        self.anatomical_sites = anatomical_sites
+        self.batch_size = batch_size
+        self.image_data_generator = image_data_generator
+        self.shuffle = shuffle
+        self.indexes = np.arange(len(self.x))
+
+    def __len__(self):
+        return int(np.ceil(len(self.x) / self.batch_size))
+
+    def on_epoch_end(self):
+        if self.shuffle:
+            np.random.shuffle(self.indexes)
+
+    def __getitem__(self, index):
+        batch_indexes = self.indexes[index * self.batch_size:(index + 1) * self.batch_size]
+        x_batch = self.x[batch_indexes]
+        age_batch = self.ages[batch_indexes]
+        sex_batch = self.sexes[batch_indexes]
+        anatomical_sites_batch = self.anatomical_sites[batch_indexes]
+        y_batch = self.y[batch_indexes]
+
+        # Apply image data augmentation
+        image_data = self.image_data_generator.flow(x_batch, y_batch, batch_size=self.batch_size, shuffle=self.shuffle)
+        image_batch, y_batch = next(image_data)
+
+        return (
+            {
+                'image_input': image_batch,
+                'age_input': age_batch,
+                'sex_input': sex_batch,
+                'anatomical_sites_input': anatomical_sites_batch
+            },
+            y_batch
+        )
+
+# Create data generators
+train_data_generator = CustomDataGenerator(x_train, y_train_one_hot, ages_train, sexes_train_encoded, anatomical_sites_train_encoded, BS, trainAug, shuffle=True)
+val_data_generator = CustomDataGenerator(x_test, y_test_one_hot, ages_test, sexes_test_encoded, anatomical_sites_test_encoded, BS, valAug, shuffle=False)
+
+
+
+from tensorflow.keras.optimizers import Adam
+model.compile(optimizer=Adam(learning_rate=0.001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Train the model
+history = model.fit(
+    train_data_generator,
+    epochs=25,
+    validation_data=val_data_generator,
+    class_weight=class_wt_dict,
+    callbacks=callback_list
+)
+
+
+
+from tensorflow.keras.models import load_model
+skincancermodel = load_model("C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\Training\\skinmodelbfive.hdf5")
+
+
+
+#Evaluate the model on the training dataset
+train_loss, train_accuracy = skincancermodel.evaluate([x_train, ages_train, sexes_train_encoded, anatomical_sites_train_encoded], y_train_one_hot, verbose=1)
+print('Training Loss:', train_loss) 
+print('Training Accuracy:', train_accuracy)
+#Evaluate the model on the testing dataset
+test_loss, test_accuracy = skincancermodel.evaluate([x_test, ages_test, sexes_test_encoded, anatomical_sites_test_encoded], y_test_one_hot, verbose=1) 
+print('Testing Loss:', test_loss) 
+print('Testing Accuracy:', test_accuracy)
+
+
+
+# Plot training and validation accuracy
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+
+# Plot training and validation loss
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.show()
+
+
+
+from sklearn.metrics import confusion_matrix, classification_report
+
+# Make predictions on the test dataset
+predicted_probs = skincancermodel.predict([x_test, ages_test, sexes_test_encoded, anatomical_sites_test_encoded], batch_size=16, verbose=0)
+
+# Extract the true labels
+y_true = np.argmax(y_test_one_hot, axis=1)
+
+# Extract the predicted labels
+y_pred = np.argmax(predicted_probs, axis=1)
+
+# Calculate the confusion matrix using true and predicted labels
+confusion_mtx = confusion_matrix(y_true, y_pred)
+
+# Define class labels
+class_labels = ['Benign Keratosis', 'Melanoma', 'Basal Cell Carcinoma','Squammous Cell Carcinoma']
+
+# Plot the confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(confusion_mtx, annot=True, fmt='d', cmap="Blues", xticklabels=class_labels, yticklabels=class_labels)
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
+
+# Compute the classification report
+report = classification_report(y_true, y_pred, target_names=class_labels)
+print(report)
+
+
+from sklearn.metrics import roc_curve, auc
+from itertools import cycle
+# Compute ROC curve and ROC area for each class
+fpr = dict()
+tpr = dict()
+roc_auc = dict()
+n_classes = len(class_labels)
+
+for i in range(n_classes):
+    fpr[i], tpr[i], _ = roc_curve(y_test_one_hot[:, i], predicted_probs[:, i])
+    roc_auc[i] = auc(fpr[i], tpr[i])
+
+# Compute macro-average ROC curve and ROC area
+all_fpr = np.unique(np.concatenate([fpr[i] for i in range(n_classes)]))
+mean_tpr = np.zeros_like(all_fpr)
+for i in range(n_classes):
+    mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+mean_tpr /= n_classes
+
+fpr["macro"] = all_fpr
+tpr["macro"] = mean_tpr
+roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+
+# Plot all ROC curves
+plt.figure(figsize=(8, 6))
+lw = 2
+colors = cycle(['aqua', 'purple', 'red','yellow'])
+
+for i, color in zip(range(n_classes), colors):
+    plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+             label='ROC curve (area = %0.2f) for class %s' % (roc_auc[i], class_labels[i]))
+
+plt.plot(fpr["macro"], tpr["macro"], color='deeppink', linestyle=':', lw=lw,
+         label='macro-average ROC curve (area = %0.2f)')
+
+plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC-AUC Curve')
+plt.legend(loc="lower right")
+plt.show()
+
+
+# Define the paths to the directories on your local machine
+benignkeratosistest_directory = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\testing\\BenignKeratosisTest"
+melanomatest_directory = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\testing\\MelanomaTest"
+basalcelltest_directory = "C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\testing\\BasalCellCarcinomaTest"
+squamoustest_directory="C:\\Users\\Asus\\Desktop\\archive\\ISIC_2019_Training_Input\\testing\\SquamousCellCarcinomaTest"
+# List the files and directories in each of the specified directories
+benigntestimages=os.listdir(benignkeratosistest_directory)
+melanomatestimages = os.listdir(melanomatest_directory)
+basaltestimages = os.listdir(basalcelltest_directory)
+squamoustestimages=os.listdir(squamoustest_directory)
+benigntest_count = len(benigntestimages)
+melanomatest_count = len(melanomatestimages)
+basaltest_count = len(basaltestimages)
+squamoustest_count = len(squamoustestimages)
+totaltest_count=benigntest_count+melanomatest_count+basaltest_count+squamoustest_count
+print('The total no of images:',totaltest_count)
+
+
+import re  # Import the regular expressions module
+
+# Function to load images, assign labels, and metadata
+def load_images_labels_metadata(directory, label1, selected_data):
+    data1, labels1, ages1, sexes1, anatomical_sites1 = [], [], [], [], []
+
+    for image_path in directory.glob('*.jpg'):
+        if image_path.is_file():
+            image_name = image_path.stem  # Get the image filename without the extension
+            try:
+                image = cv2.imread(str(image_path))
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = cv2.resize(image, (224, 224))
+                data1.append(image)
+                labels1.append(label1)
+
+                # Extract the common subportion from the image name
+                match = re.search(r'ISIC_(\d+)', image_name)
+                if match:
+                    subportion = match.group(1)
+                    # Find the corresponding metadata in selected_data based on the subportion
+                    metadata_entry = selected_data[selected_data['image'].str.contains(subportion)]
+                    if not metadata_entry.empty:
+                        age1 = metadata_entry['age_approx'].values[0]
+                        sex1 = metadata_entry['sex'].values[0]
+                        anatomical_site1 = metadata_entry['anatom_site_general'].values[0]
+                        if pd.isna(anatomical_site1):
+                            anatomical_site1 = 'unknown'
+                        if pd.isna(age1):
+                            age1 = -1  # Replace missing age with -1 or any other suitable placeholder
+                        if pd.isna(sex1):
+                            sex1 = 'unknown'  # Replace missing sex with 'unknown'
+                        ages1.append(age1)
+                        sexes1.append(sex1)
+                        anatomical_sites1.append(anatomical_site1)
+                        print(f"Loaded image: {image_path.name} with label {label1}, age {age1}, sex {sex1}, site {anatomical_site1}, size: {image.shape}")
+                    else:
+                        print(f"Error: No matching subportion found in image name: {image_path.name}")
+                        ages1.append(-1)  # Replace missing age with -1 or any other suitable placeholder
+                        sexes1.append('unknown')  # Replace missing sex with 'unknown'
+
+            except AttributeError:
+                print(f"Error loading image: {image_path.name}")
+
+    return data1, labels1, ages1, sexes1, anatomical_sites1
+# Load images and assign labels, age, sex, and anatomical site using the extracted metadata
+benign_data1, benign_labels1, benign_ages1, benign_sexes1, benign_sites1 = load_images_labels_metadata(Path(benignkeratosistest_directory), 0, selected_data)
+melanoma_data1, melanoma_labels1, melanoma_ages1, melanoma_sexes1, melanoma_sites1 = load_images_labels_metadata(Path(melanomatest_directory), 1, selected_data)
+basal_data1, basal_labels1, basal_ages1, basal_sexes1, basal_sites1 = load_images_labels_metadata(Path(basalcelltest_directory), 2, selected_data)
+squamous_data1, squamous_labels1,squamous_ages1, squamous_sexes1, squamous_sites1 = load_images_labels_metadata(Path(squamoustest_directory), 3, selected_data)
+
+# Combine data and labels for all categories
+data1 = np.concatenate((benign_data1, melanoma_data1, basal_data1,squamous_data1), axis=0)
+labels1 = np.concatenate((benign_labels1, melanoma_labels1, basal_labels1,squamous_labels1), axis=0)
+ages1 = np.concatenate((benign_ages1, melanoma_ages1, basal_ages1,squamous_ages1), axis=0)
+sexes1 = np.concatenate((benign_sexes1, melanoma_sexes1, basal_sexes1,squamous_sexes1), axis=0)
+anatomical_sites1 = np.concatenate((benign_sites1, melanoma_sites1, basal_sites1,squamous_sites1), axis=0)
+
+# Verify the shape of the data and labels arrays
+print("Data shape:", data1.shape)
+print("Labels shape:", labels1.shape)
+print("Ages shape:", ages1.shape)
+print("Sexes shape:", sexes1.shape)
+print("Anatomical Sites shape:", anatomical_sites1.shape)
+
+
+
+unique_values = np.unique(anatomical_sites1)
+print(unique_values)
+
+
+x_test1 = data1.astype('float32')/255
+y_test1=to_categorical(labels1,4)
+# One-hot encode 'sex' and 'anatomical_sites'
+# One-hot encode 'sex' without a "missing" category
+sex_one_hot1 = pd.get_dummies(sexes1, prefix='sex')
+# One-hot encode 'anatomical_sites' with a "missing" category
+anatomical_sites_one_hot1 = pd.get_dummies(anatomical_sites1, prefix='site', dummy_na=True)
+
+# Fill missing values with 0 (or any other suitable placeholder)
+anatomical_sites_one_hot1.fillna(0, inplace=True)
+
+# Ensure the DataFrame has 9 columns (including "missing")
+anatomical_sites_one_hot1 = anatomical_sites_one_hot1.reindex(columns=['site_head/neck', 'site_anterior torso', 'site_lateral torso', 'site_lower extremity', 'site_palms/soles', 'site_posterior torso', 'site_nan', 'site_upper extremity', 'site_unknown'], fill_value=0)
+
+
+
+from sklearn.metrics import confusion_matrix, classification_report
+
+# Make predictions on the test dataset
+predicted_probs1 = skincancermodel.predict([x_test1, ages1, sex_one_hot1, anatomical_sites_one_hot1], batch_size=16, verbose=0)
+
+# Extract the true labels for the testing data
+y_true1 = np.argmax(y_test1, axis=1)
+
+# Extract the predicted labels for the testing data
+y_pred1 = np.argmax(predicted_probs1, axis=1)
+
+# Calculate the confusion matrix using true and predicted labels for the testing data
+confusion_mtx1 = confusion_matrix(y_true1, y_pred1)
+
+# Define class labels
+class_labels1 = ['Benign Keratosis', 'Melanoma', 'Basal Cell Carcinoma','Squmaous Cell Carcinoma']
+
+# Plot the confusion matrix for the testing data
+plt.figure(figsize=(8, 6))
+sns.heatmap(confusion_mtx1, annot=True, fmt='d', cmap="Blues", xticklabels=class_labels1, yticklabels=class_labels1)
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
+
+# Compute the classification report for the testing data
+report1 = classification_report(y_true1, y_pred1, target_names=class_labels1)
+print(report1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
