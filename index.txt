@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Cancer Classification App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        label, input, select {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        #image-preview {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function previewImage() {
+            var fileInput = document.getElementById('file');
+            var imagePreview = document.getElementById('image-preview');
+
+            fileInput.addEventListener('change', function () {
+                var file = fileInput.files[0];
+
+                if (file) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.src = '';
+                    imagePreview.style.display = 'none';
+                }
+            });
+        }
+	async function handleSubmit(event) {
+        	event.preventDefault();
+
+        	const form = event.target;
+        	const formData = new FormData(form);
+
+        	const response = await fetch('/predict', {
+            		method: 'POST',
+            		body: formData,
+       		});
+
+        	const result = await response.json();
+
+        	// Update prediction result
+        	const resultDiv = document.getElementById('prediction-result');
+        	resultDiv.innerHTML = `<p><strong>Predicted Class:</strong> ${result.predicted_class}</p><p>${result.message}</p>`;
+
+        	// Update chart
+        	const chartContainer = document.getElementById('chart-container');
+        	chartContainer.innerHTML = `<img src="${result.chart_url}" alt="Chart">`;
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        previewImage();
+        document.querySelector('form').addEventListener('submit', handleSubmit);
+      });
+    </script>
+</head>
+<body onload="previewImage()">
+    <h1>Welcome to the Skin Cancer Classification App</h1>
+    <form action="/predict" method="post" enctype="multipart/form-data">
+  	<label for="file" style="color: blue; text-decoration: underline;">Choose an image:</label>
+  	<input type="file" name="file" id="file" accept=".jpg, .jpeg, .png">
+  	<img id="image-preview" alt="Image Preview" style="display: none;">
+  	<br>
+
+  	<label for="age">Enter age:</label>
+  	<input type="number" name="age" id="age" min="-1">
+  	<br>
+
+  	<label for="gender">Select gender:</label>
+  	<select id="gender" name="gender">
+    		<option value="male">Male</option>
+    		<option value="female">Female</option>
+    		<option value="unknown">Unknown</option>
+  	</select>
+  	<br>
+
+  	<label for="anatomical_site">Select anatomical site:</label>
+ 	<select id="anatomical_site" name="anatomical_site">
+   	 	<option value="head/neck">Head/Neck</option>
+    		<option value="upper extremity">Upper Extremity</option>
+    		<option value="anterior torso">Anterior Torso</option>
+   		 <option value="lower extremity">Lower Extremity</option>
+   	 	<option value="posterior torso">Posterior Torso</option>
+   	 	<option value="lateral torso">Lateral Torso</option>
+   	 	<option value="palms/soles">Palms/Soles</option>
+    		<option value="oral/genital">Oral/Genital</option>
+   	 	<option value="unknown">Unknown/Others</option>
+ 	</select>
+  	<br>
+
+  	<input type="submit" value="Predict">
+    </form>
+</body>
+</html>
