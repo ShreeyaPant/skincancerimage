@@ -1,0 +1,54 @@
+<!-- templates/result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Cancer Classification Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa; /* Light gray background color */
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff; /* Blue header color */
+        }
+
+        #result-container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #ffffff; /* White container background color */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #chart-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Skin Cancer Classification Result</h1>
+
+    <div id="result-container">
+        <p>Predicted Class: {{ predicted_class }}</p>
+        <p>{{ message }}</p>
+
+        <div id="chart-container">
+            <img src="{{ url_for('static', filename='chart.png') }}" alt="Chart">
+        </div>
+    </div>
+</body>
+</html>
+
+
