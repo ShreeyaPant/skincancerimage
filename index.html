@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Cancer Classification App</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Font Awesome CSS -->
+    <script src="https://kit.fontawesome.com/429b19e73c.js" crossorigin="anonymous"></script>
+    
+</head>
+
+<body>
+    <div id="mainContent" class="searchable">
+        <nav class="navbar">
+            <ul class="nav-list">
+                <div class="logo"><img src="static/logo.png" alt="Logo"></div>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="{{ url_for('check_lesion')}}">Check Lesion</a></li>
+                <li><a href="#contact">Contact Us</a></li>
+            </ul>
+            <div class="rightNav">
+                <input type="text" id="search" name="search" placeholder="Search...">
+                <button class="btn btn-sm bluete" onclick="searchAndScroll()" id="search">Search</button>
+            </div>
+        </nav>
+        <section class="background homesection" id="home">
+            <div class="box-home">
+                <div class="homecontent">
+                    <p class="text-big">Skin Cancer</p>
+                    <p class="text-small pad">Skin cancer is a complex condition characterized by the uncontrolled proliferation of abnormal skin cells, primarily attributed to prolonged exposure to ultraviolet (UV) radiation. The disease encompasses various types, notably basal cell carcinoma, squamous cell carcinoma, and melanoma, each presenting distinct characteristics. Basal cell carcinoma typically manifests as gradual, flesh-colored bumps, whereas squamous cell carcinoma reveals itself through scaly patches or persistent sores. Melanoma, distinguished by its heightened aggressiveness, originates from pigment-producing cells, often showcasing irregular moles or lesions. Early symptoms may involve subtle changes in existing moles or the emergence of new growths. Implementing preventive measures, including sunscreen application, protective clothing, and routine skin checks, is imperative for early detection and effective treatment strategies, thereby underscoring the importance of proactive skin health management.</p>
+                </div>
+                <div class="homepicture">
+                    <div id="imageSlideshow" class="slideshow-container">
+                        <div class="mySlides">
+                            <img src="static/abcdes.png" alt="Slide 1">
+                        </div>
+                        <div class="mySlides">
+                            <img src="static/img2.png" alt="Slide 2">
+                        </div>
+                        <div class="mySlides">
+                            <img src="static/slide3.png" alt="Slide 3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+        <section class="sec">
+            <div class="paragraph">
+                <p class="sectionTag text-big">Symptoms</p>
+                <p class="sectionSubTag text-small">Skin cancer symptoms manifest in various ways, signaling potential health concerns. Notable indicators encompass alterations in moles, exhibiting changes in size, color, or shape. The appearance of new growths, accompanied by persistent itching or tenderness, is another significant aspect. Irregular pigmentation, spontaneous bleeding, and the development of persistent sores further characterize potential symptoms. Changes in skin texture, ulceration, redness extending beyond mole borders, dark streaks under nails, and unexplained pain add to the complex spectrum of manifestations.  </p>
+                
+            </div>
+            <div class="des1">
+                <img src="static/par1.png" alt="symptoms" class="Img1">
+             </div>
+        </section>
+        <section class="sec Left">
+            <div class="paragraph">
+                <p class="sectionTag text-big">Causes/Risk Factor</p>
+                <p class="sectionSubTag text-small">Skin cancer risk factors are multifaceted, with prolonged exposure to ultraviolet (UV) radiation from the sun or tanning beds serving as a primary catalyst. Individuals with fair skin, prone to easy sunburns, face an elevated risk. A family history of skin cancer, coupled with the presence of numerous moles or atypical moles, adds genetic dimensions to susceptibility. A weakened immune system, arising from various factors, further amplifies risk. Specific medical conditions and exposure to certain substances contribute to the intricate web of factors. Age, especially in older individuals, emerges as a significant determinant, underscoring the nuanced interplay of variables influencing skin cancer vulnerability.</p>
+            </div>
+            <div class="des1">
+                <img src="static/par2.png" alt="causes" class="Img1">
+            </div>
+        </section>
+        <section class="sec">
+            <div class="paragraph">
+                <p class="sectionTag text-big">Prevention</p>
+                <p class="sectionSubTag text-small">Implementing comprehensive preventive strategies is pivotal in mitigating the risk of skin cancer. Effective measures include prudent sun exposure management, particularly during peak hours, and the diligent application of sunscreen with a high SPF. Embracing protective clothing, steering clear of tanning beds, and incorporating routine self-checks for any skin changes are crucial habits. Seeking shade, maintaining hydration, and instilling sun-safe practices in children contribute significantly to a proactive approach. Equally vital is prioritizing early detection through regular screenings, forming a cornerstone for successful intervention.</p>
+            </div>
+            <div class="des1">
+                <img src="static/para3.png" alt="prevention" class="Img1">
+            </div>
+        </section>
+        <section class="sec Left">
+            <div class="paragraph">
+                <p class="sectionTag text-big">Treatment</p>
+                <p class="sectionSubTag text-small">Navigating skin cancer treatment necessitates a personalized approach, contingent upon the cancer's type, stage, and location. Surgical excision, Mohs surgery for specific types, radiation therapy, cryotherapy, and topical medications stand as common modalities. The evolving landscape of treatments includes immunotherapy, a promising avenue. The pivotal role of early detection cannot be overstated, significantly enhancing the prospects of successful intervention. Those diagnosed with skin cancer are advised to engage in informed consultations with healthcare professionals, ensuring the formulation of a tailored treatment plan aligned with the intricacies of their specific case.</p>
+            </div>
+            <div class="des1">
+                <img src="static/par4.png" alt="treatment" class="Img1">
+            </div>
+        </section>
+        
+        <section class="bg" id="about">
+            <section class="sec1" >
+                <div class="paragraph">
+                    <p class="sectionTag text-big bluei">ABOUT US</p>
+                    <p class="sectionSubTag text-small">As third-year computer engineering students at Kathmandu Engineering College, our journey is fueled by a deep passion for innovation. This website marks our initial step towards a promising future. Here, we seamlessly integrate our expertise with a groundbreaking skin cancer classification model, showcasing our commitment to impactful technology. Excitement fills our hearts as we contribute to the AI revolution in the medical field, particularly in the context of skin cancer. We are avid AI enthusiasts, dedicated to pioneering positive change through our projects.</p>
+                </div>
+                <div class="des2">
+                    <img src="static/AI.png" alt="AI in medicine" class="Img1">
+                </div>
+            </section>
+        </section>
+        <section class="contact" id="contact">
+            <p class="text-center">CONTACT US</p>
+            <div class="form">
+                <form action="https://formsubmit.co/9e578ff19c2d39fe85c783340cbc862a" method="POST">
+                    <input type="text" name="name" class="form-input" id="name" placeholder="Enter your name..." required>
+                    <input type="email" name="email" class="form-input" id="name" placeholder="Enter your email..." required>
+                    <textarea type="email" name="text" class="form-input" id="text" cols="45" rows="15" placeholder="Enter your comments..."></textarea>
+                    <button class="btn1 bluete" >Submit</button>
+                    
+                </form>
+            </div>
+        </section>
+        <footer class="tfooter">
+            <p class="pfooter">
+                <span>Copyright &copy; 2024 - All rights reserved</span>
+                <br>
+                <span><i class="fas fa-phone"></i> 977-9897675467</span>
+                <span><i class="far fa-envelope"></i> skinfriend70@gmail.com</span>
+            </p>
+        </footer>
+        
+    </div>
+    
+
+    <script>
+        
+        
+        // JavaScript for image slideshow
+        var slideIndex = 0;
+        showSlides();
+
+        function showSlides() {
+            var i;
+            var slides = document.getElementsByClassName("mySlides");
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+            slideIndex++;
+            if (slideIndex > slides.length) {
+                slideIndex = 1;
+            }
+            slides[slideIndex - 1].style.display = "block";
+            setTimeout(showSlides, 2000); // Change slide every 2 seconds
+        }
+        function searchAndScroll() {
+            var searchTerm = document.getElementById('search').value;
+            var container = document.getElementById('mainContent');
+    
+            // Remove existing highlights
+            var highlights = container.querySelectorAll('.highlight');
+            highlights.forEach(function (highlight) {
+                highlight.outerHTML = highlight.textContent;
+            });
+    
+            // Check for an empty search term
+            if (searchTerm.trim() === "") {
+                return;
+            }
+    
+            // Escape special characters in the search term
+            searchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    
+            // Use a regular expression to find and replace within the container, excluding HTML tags
+            container.innerHTML = container.innerHTML.replace(new RegExp(`(?![^<>]*>)${searchTerm}`, 'gi'), function (match) {
+                return '<span class="highlight">' + match + '</span>';
+            });
+            // Calculate frequency of each highlighted word
+            var highlightedWords = container.querySelectorAll('.highlight');
+            var wordFrequency = {};
+            highlightedWords.forEach(function (highlight) {
+                var word = highlight.textContent.toLowerCase();
+                wordFrequency[word] = (wordFrequency[word] || 0) + 1;
+            });
+
+            // Find the word with the maximum frequency
+            var maxFrequencyWord = Object.keys(wordFrequency).reduce(function (a, b) {
+                return wordFrequency[a] > wordFrequency[b] ? a : b;
+            });
+
+            // Scroll to the part of the page where the word occurs most frequently
+            var maxFrequencyElement = findElementByTextContent(container, maxFrequencyWord);
+            if (maxFrequencyElement) {
+                maxFrequencyElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        // Custom function to find an element by its text content
+        function findElementByTextContent(container, text) {
+            var elements = container.querySelectorAll('.highlight');
+            for (var i = 0; i < elements.length; i++) {
+                if (elements[i].textContent.toLowerCase() === text.toLowerCase()) {
+                    return elements[i];
+                }
+            }
+            return null;
+        }
+    </script>
+</body>
+</html>
