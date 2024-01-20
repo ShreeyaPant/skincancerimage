@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Lesion</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylechecklesion.css')}}">
+</head>
+<body>
+    <section class="sect1"></section>
+            <p class="text-center1">Form</p>
+            <div class="form1">
+                <form action="/predict" method="post" enctype="multipart/form-data">
+                    <label for="file" class="form1-label">Choose an image:</label>
+                    <br>
+                    <input type="file" name="file" color:blue class="form1-input" id="file" accept=".jpg, .jpeg, .png" style=" text-align: center; text-align-last: center;">
+                    <img id="image-preview" alt="Image Preview" style="display: none; margin:auto;">
+                    <br>
+                    
+                    <label for="age" class="form1-label">Enter age:(Type -1 if the age is unknown)</label>
+                    <br>
+                    <input type="number" name="age" class="form1-input" value="30" id="age" min="-1">
+                    <br>
+                    <label for="gender" class="form1-label">Select gender:</label>
+                    <br>
+                    <select id="gender" name="gender" class="form1-input">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
+                    <br>
+                    <label for="anatomical_site" class="form1-label">Select anatomical site:</label>
+                    <br>
+                    <select id="anatomical_site" name="anatomical_site" class="form1-input">
+                        <option value="head/neck">Head/Neck</option>
+                        <option value="upper extremity">Upper Extremity</option>
+                        <option value="anterior torso">Anterior Torso</option>
+                        <option value="lower extremity">Lower Extremity</option>
+                        <option value="posterior torso">Posterior Torso</option>
+                        <option value="lateral torso">Lateral Torso</option>
+                        <option value="palms/soles">Palms/Soles</option>
+                        <option value="oral/genital">Oral/Genital</option>
+                        <option value="unknown">Unknown/Others</option>
+                    </select>
+                    <br>
+                    <input type="submit" value="Predict" class="btn2">
+                </form>
+            </div>
+            
+    </section>
+    <footer class="tfooter">
+        <p class="pfooter">
+            <span>Copyright &copy; 2024 - All rights reserved</span>
+            <br>
+            <span><i class="fas fa-phone"></i> 977-9897675467</span>
+            <span><i class="far fa-envelope"></i> skinfriend70@gmail.com</span>
+        </p>
+    </footer>
+
+    <script>
+        function previewImage() {
+            var fileInput = document.getElementById('file');
+            var imagePreview = document.getElementById('image-preview');
+
+            fileInput.addEventListener('change', function () {
+                var file = fileInput.files[0];
+
+                if (file) {
+                    var reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    };
+
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.src = '';
+                    imagePreview.style.display = 'none';
+                }
+            });
+        }
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            // Redirect to the result page with the prediction result
+            window.location.href = `/result?predicted_class=${result.predicted_class}&message=${result.message}&chart_url=${result.chart_url}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            previewImage();
+            document.querySelector('form').addEventListener('submit', handleSubmit);
+        });
+
+
+    </script>
+</body>
+</html>
