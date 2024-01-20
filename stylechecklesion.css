@@ -1,0 +1,105 @@
+
+*{
+    margin: 0;
+    padding: 0;
+   
+}
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.sect1 {
+    flex: 1;
+    
+}
+
+
+.text-center1{
+    text-align: center;
+    color: rgb(32, 10, 130);
+    font-size: 40px;
+    padding: 25px 0px;
+}
+
+.text-center1 p{
+    margin:20px auto;
+}
+.form1{
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 40px 80px;
+    background-color: #ffffff; 
+    border-radius: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.17);
+}
+
+.form1-input{
+    width: 100%;
+    font-size: 16px;
+    text-align: center;
+    border: 2px solid grey;
+    border-radius: 5px;
+    margin:16px auto;
+    padding:6px 2px;
+}
+.form1-label{
+    width: 100%;
+    font-size: 19px;
+    margin:16px auto;
+    padding:6px 2px;
+}
+.btn2{
+    padding: 4px 5px;
+    margin: 7px 3px;
+    border:2px solid grey;
+    color:blue;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 17px;
+    width:22%
+
+}
+/* Add media query for responsiveness */
+@media only screen and (max-width: 600px) {
+    form {
+        padding: 10px;
+    }
+}
+.tfooter {
+    background-color: rgb(6, 3, 34);
+    text-align: center; /* Center text */
+    color: white;
+    padding: 10px; /* Adjust padding as needed */
+    margin-top: 50px; 
+}
+
+.pfooter {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap to the next line */
+    justify-content: center;
+    align-items: center;
+}
+
+
+.pfooter span {
+    font-size: 19px;
+    padding: 5px 10px;
+}
+
+.pfooter i {
+    margin-right: 5px; /* Adjust the spacing between icon and text */
+}
+
+.pfooter br {
+    display: none; /* Hide line break on larger screens */
+}
+
+@media (max-width: 768px) {
+    .pfooter br {
+        display: block; /* Show line break on smaller screens */
+    }
+}
