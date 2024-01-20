@@ -10,7 +10,7 @@ import matplotlib
 matplotlib.use('Agg')  # Use Agg backend to avoid Tkinter in non-main thread issues
 import matplotlib.pyplot as plt
 import os
-
+import time
 app = Flask(__name__)
 
 # Load the trained model
@@ -19,14 +19,13 @@ skincancermodel = load_model("C:\\Users\\Asus\\Desktop\\important\\skinmodelepoc
 # Mapping for anatomical sites and gender
 anatomical_site_mapping = ['head/neck', 'upper extremity', 'anterior torso', 'lower extremity', 'posterior torso', 'lateral torso', 'palms/soles', 'oral/genital', 'unknown']
 gender_mapping = ['male', 'female', 'unknown']
-class_labels = ['Benign Keratosis', 'Melanoma', 'Basal Cell Carcinoma', 'Squamous Cell Carcinoma']
-
+class_labels = ['Benign Keratosis', 'Melanoma', 'Basal Carcinoma', 'Squamous Carcinoma']
 # Severity information for each cancer type
 severity_info = {
     'Benign Keratosis': 'Generally benign, but consult a dermatologist for evaluation.',
     'Melanoma': 'Potentially dangerous. Consult a dermatologist immediately.',
-    'Basal Cell Carcinoma': 'Usually non-aggressive, but consult a dermatologist for proper evaluation.',
-    'Squamous Cell Carcinoma': 'Can be aggressive. Consult a dermatologist promptly.'
+    'Basal Carcinoma': 'Usually non-aggressive, but consult a dermatologist for proper evaluation.',
+    'Squamous Carcinoma': 'Can be aggressive. Consult a dermatologist promptly.'
 }
 
 def preprocess_image(uploaded_file):
@@ -43,6 +42,8 @@ def preprocess_image(uploaded_file):
 
     # Convert PIL Image to NumPy array
     img = np.array(pil_image)
+    
+   
 
     # Resize the image to (224, 224)
     img = cv2.resize(img, (224, 224))
@@ -70,8 +71,12 @@ def convert_to_jpg(uploaded_file):
 
 @app.route('/')
 def home():
-    return render_template('index.html')  # Create an HTML template for the home page
-
+    return render_template('index.html')
+      # Create an HTML template for the home page
+@app.route('/check_lesion')
+def check_lesion():
+    return render_template('check_lesion.html')
+    
 @app.route('/predict', methods=['POST'])
 def predict():
     uploaded_file = request.files['file']
@@ -106,12 +111,13 @@ def predict():
     # Plot the predicted probabilities as a bar chart using Matplotlib
     plt.figure(figsize=(8, 6))
     plt.bar(df['Class'], df['Probability'], color='skyblue')
-    plt.xlabel('Class')
     plt.ylabel('Probability')
     plt.title('Skin Cancer Classification Probability')
-    
+   
     # Save the chart as an image in the 'static' directory
-    chart_path = os.path.join(save_directory, 'chart.png')
+    timestamp = int(time.time())
+    chart_path = os.path.join(save_directory, f'chart_{timestamp}.png')
+   
     plt.savefig(chart_path)
     plt.close()
 
@@ -121,7 +127,14 @@ def predict():
         'message': message,
         'chart_url': chart_path,
     })
+@app.route('/result')
+def result():
+    predicted_class = request.args.get('predicted_class')
+    message = request.args.get('message')
+    chart_url = request.args.get('chart_url')
 
-    return render_template('result.html', predicted_class=predicted_class_name, message=message)
+    return render_template('result.html', predicted_class=predicted_class, message=message, chart_url=chart_url)
+
 if __name__ == '__main__':
     app.run(debug=True)
+    
