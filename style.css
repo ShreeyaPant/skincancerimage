@@ -17,7 +17,7 @@ html{
     cursor: pointer;
 }
 .nav-list{
-    width: 60%;
+    width: 70%;
     display: flex;
     /*justify-content: center;*/
     align-items: center;
@@ -48,18 +48,18 @@ html{
 }
 
 .logo{
-    width: 30%;
+    width: 20%;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 .logo img{
-    width: 80%;
+    width: 40%;
     border: 2px solid white;
-    border-radius: 45px;
+    border-radius: 50%;
 }
 .rightNav{
-    width: 40%;
+    width: 30%;
     text-align: right;
     padding: 0 20px;
     
@@ -69,6 +69,7 @@ html{
     display: inline;   
 }
 #search{
+    width:34%;
     padding:5px;
     font-size: 17px;
     border: 2px solid white;
@@ -122,7 +123,7 @@ html{
     padding: 9px 0px;
 }
 .sec{
-    height:450px;
+    
     display:flex;
     align-items: center;
     justify-content: space-evenly;
@@ -163,7 +164,7 @@ html{
     border-radius: 200px;
 }
 .sec1{
-    height:400px;
+    
     display:flex;
     flex-direction: column;
     align-items: center;
@@ -175,6 +176,7 @@ html{
 .contact{
     background-color: white;
     height:95vh;
+    
 }
 .text-center{
     text-align: center;
@@ -209,8 +211,7 @@ html{
     border-radius: 7px;
     cursor: pointer;
     font-size: 18px;
-    width:18%
-
+    width:30%
 }
 .bluete{
     color:blue;
@@ -229,6 +230,13 @@ html{
     flex-wrap: wrap; /* Allow items to wrap to the next line */
     justify-content: center;
     align-items: center;
+}
+.btn-sm {
+    margin:10px;
+    padding: 6px 10px;
+    vertical-align: middle;
+    font-size: 16px;
+    border-radius: 6px;
 }
 
 /*.pfooter li {
@@ -263,5 +271,80 @@ html{
         display: block; /* Show line break on smaller screens */
     }
 }
+.burger{
+    display: none;
+    position: absolute;
+    cursor: pointer;
+    right: 5%;
+    top:15px;
+}
+.line{
+    width: 33px;
+    background-color: white;
+    height: 4px;
+    margin: 5px 3px;
+}
 
 
+@media only screen and (max-width: 1200px){
+    .nav-list{
+        flex-direction: column;
+    }
+    .navbar{
+        height: 500px;
+        flex-direction: column;
+        transition: all 0.7s ease-out;
+    }
+    .rightNav{
+        text-align: center;
+    }
+    .box-home{
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .homesection {
+        height: 150vh;
+    }
+
+    #search{
+        width: 60%;
+    }
+    .burger{
+    display: block;
+    }
+    .h-nav-resp{
+        height: 72px;
+    }
+    .v-class-resp{
+        opacity: 0;
+    }
+    .section{
+        flex-direction: column-reverse;
+    }
+    .text-small{
+        text-align: center;
+    }
+    .text-big{
+        text-align: center;
+    }
+    .buttons{
+        text-align: center;
+    }
+    .paras {
+    padding: 0px;}
+    .form{
+        max-width: 50%;
+    }
+    .sec{
+        flex-direction: column-reverse; /*this is of symptoms*/
+        margin:100px;
+    }
+    .bg{
+        flex-direction: column-reverse; /*this is of symptoms*/
+        margin:20px;
+    }
+    .contact{
+        height:80vh;
+    }
+    
+}
