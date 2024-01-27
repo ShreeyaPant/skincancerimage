@@ -4,6 +4,9 @@
     padding: 0;
    
 }
+html{
+    height:100%
+}
 body {
     display: flex;
     flex-direction: column;
@@ -58,7 +61,7 @@ body {
     border-radius: 7px;
     cursor: pointer;
     font-size: 17px;
-    width:22%
+    
 
 }
 /* Add media query for responsiveness */
@@ -72,7 +75,7 @@ body {
     text-align: center; /* Center text */
     color: white;
     padding: 10px; /* Adjust padding as needed */
-    margin-top: 50px; 
+    margin-top: auto; 
 }
 
 .pfooter {
