@@ -6,7 +6,14 @@
 }
 html{
     scroll-behavior: smooth;
+    height:100%;
 }
+body{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 .navbar{
     display: flex;
     background-color: rgb(6, 3, 34);
@@ -175,7 +182,7 @@ html{
 }
 .contact{
     background-color: white;
-    height:95vh;
+    
     
 }
 .text-center{
@@ -221,6 +228,8 @@ html{
     text-align: center; /* Center text */
     color: white;
     padding: 10px; /* Adjust padding as needed */
+    margin-top: 50px;
+    
 }
 
 .pfooter {
@@ -343,8 +352,10 @@ html{
         flex-direction: column-reverse; /*this is of symptoms*/
         margin:20px;
     }
-    .contact{
-        height:80vh;
+    .tfooter{
+        margin-top: 50px;
     }
+
+    
     
 }

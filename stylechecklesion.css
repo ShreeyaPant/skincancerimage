@@ -97,6 +97,12 @@ body {
 .pfooter br {
     display: none; /* Hide line break on larger screens */
 }
+#image-preview {
+    max-width: 100%; /* Ensures the image fits within the container width */
+    max-height: 200px; /* Set the maximum height of the image */
+    display: none;
+    margin: auto;
+  }
 
 @media (max-width: 768px) {
     .pfooter br {
