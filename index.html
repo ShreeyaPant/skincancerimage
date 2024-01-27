@@ -10,21 +10,27 @@
     <!-- Font Awesome CSS -->
     <script src="https://kit.fontawesome.com/429b19e73c.js" crossorigin="anonymous"></script>
     
+    
 </head>
 
 <body>
     <div id="mainContent" class="searchable">
-        <nav class="navbar">
-            <ul class="nav-list">
+        <nav class="navbar h-nav-resp">
+            <ul class="nav-list v-class-resp">
                 <div class="logo"><img src="static/logo.jpg" alt="Logo"></div>
                 <li><a href="#home">Home</a></li>
                 <li><a href="#about">About Us</a></li>
                 <li><a href="{{ url_for('check_lesion')}}">Check Lesion</a></li>
                 <li><a href="#contact">Contact Us</a></li>
             </ul>
-            <div class="rightNav">
+            <div class="rightNav v-class-resp">
                 <input type="text" id="search" name="search" placeholder="Search...">
-                <button class="btn btn-sm bluete" onclick="searchAndScroll()" id="search">Search</button>
+                <button class="btn-sm" onclick="searchAndScroll()" >Search</button>
+            </div>
+            <div class="burger">
+                <div class="line"></div>
+                <div class="line"></div>
+                <div class="line"></div>
             </div>
         </nav>
         <section class="background homesection" id="home">
@@ -110,6 +116,7 @@
                 </form>
             </div>
         </section>
+        <section class="footer_sec">
         <footer class="tfooter">
             <p class="pfooter">
                 <span>Copyright &copy; 2024 - All rights reserved</span>
@@ -118,6 +125,7 @@
                 <span><i class="far fa-envelope"></i> skinfriend70@gmail.com</span>
             </p>
         </footer>
+        </section>
         
     </div>
     
@@ -194,5 +202,6 @@
             return null;
         }
     </script>
+    <script src="static/resp.js"></script>
 </body>
 </html>
